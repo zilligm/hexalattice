@@ -130,7 +130,7 @@ def plot_single_lattice(coord_x, coord_y, face_color, edge_color, min_diam, plot
 
     if h_ax is None:
         h_fig = plt.figure(figsize=(5, 5))
-        h_ax = h_fig.add_axes([0.05, 0.05, 0.9, 0.9])
+        h_ax = h_fig.add_axes([0.1, 0.1, 0.8, 0.8])
 
     patches = []
     for curr_x, curr_y in zip(coord_x, coord_y):
@@ -142,8 +142,10 @@ def plot_single_lattice(coord_x, coord_y, face_color, edge_color, min_diam, plot
     h_ax.add_collection(collection)
 
     h_ax.set_aspect('equal')
-    h_ax.axis([coord_x.min() - 2 * min_diam, coord_x.max() + 2 * min_diam, coord_y.min() - 2 * min_diam,
-               coord_y.max() + 2 * min_diam])
+    # h_ax.axis([coord_x.min() - 2 * min_diam, coord_x.max() + 2 * min_diam, coord_y.min() - 2 * min_diam,
+    #            coord_y.max() + 2 * min_diam])
+    h_ax.axis([coord_x.min() - 1 * min_diam, coord_x.max() + 1 * min_diam, coord_y.min() - 1 * min_diam,
+               coord_y.max() + 1 * min_diam])
     # plt.plot(0, 0, 'r.', markersize=5)   # Add red point at the origin
     return h_ax
 
@@ -164,6 +166,8 @@ def make_grid(nx, ny, min_diam, n, crop_circ, rotate_deg, align_to_origin) -> (n
     coord_x[1::2, :] += 0.5
     coord_x = coord_x.reshape(-1, 1)
     coord_y = coord_y.reshape(-1, 1)
+
+    # print(coord_x, coord_y)
 
     coord_x *= min_diam  # Scale to requested size
     coord_y = coord_y.astype('float') * min_diam
@@ -256,108 +260,25 @@ def sample_colors_from_image_by_grid(image_path: str, x_coords, y_coords):
     return colors
 
 
-def main():
-
-    plt.ion()
-
-    # (1) === Create single hexagonal 5*5 lattice and plot it. Extract the [x,y] locations of the tile centers
-    hex_centers, h_ax = create_hex_grid(nx=5, ny=5, do_plot=True)
-    tile_centers_x = hex_centers[:, 0]
-    tile_centers_y = hex_centers[:, 1]
-    # plt.show(block=True)   % The 'show' call should be done explicitly
-
-    # (2) === Create single hexagonal lattice, 5*5, rotated around central tile ====
-    hex_centers, _ = create_hex_grid(nx=5,
-                                     ny=5,
-                                     plotting_gap=0.05,
-                                     min_diam=1,
-                                     rotate_deg=5,
-                                     face_color=[0.9, 0.1, 0.1, 0.05],
-                                     do_plot=True)
-
-    # (3) === Plot Moire pattern with two round hexagonal grids ====
-    hex_grid1, h_ax = create_hex_grid(nx=50,
-                                      ny=50,
-                                      rotate_deg=0,
-                                      min_diam=1,
-                                      crop_circ=20,
-                                      do_plot=True)
-    create_hex_grid(nx=50,
-                    ny=50,
-                    min_diam=1,
-                    rotate_deg=5,
-                    crop_circ=20,
-                    do_plot=True,
-                    h_ax=h_ax)
-
-    # (4) === Create 5 layers of grids of various sizes ====
-    face_c = [0.7, 0.7, 0.7, 0.1]
-    _, h_ax = create_hex_grid(nx=5,
-                              ny=4,
-                              plotting_gap=0.2,
-                              face_color=face_c,
-                              min_diam=1,
-                              do_plot=True)
-    create_hex_grid(nx=4,
-                    ny=3,
-                    min_diam=1,
-                    plotting_gap=0.3,
-                    face_color=face_c,
-                    do_plot=True,
-                    h_ax=h_ax)
-    create_hex_grid(nx=2,
-                    ny=2,
-                    plotting_gap=0.4,
-                    face_color=face_c,
-                    do_plot=True,
-                    h_ax=h_ax)
-    create_hex_grid(nx=1,
-                    ny=1,
-                    plotting_gap=0.5,
-                    face_color=face_c,
-                    do_plot=True,
-                    h_ax=h_ax)
-    create_hex_grid(nx=10,
-                    ny=10,
-                    edge_color=[0.9, 0.9, 0.9],
-                    do_plot=True,
-                    h_ax=h_ax)
-
-    # (5) === Color hexagons with custom colors ===
-    image_path = r'example_image.jpg'  # taken from https://en.wikipedia.org/wiki/Apple#/media/File:Red_Apple.jpg
-    hex_centers, h_ax = create_hex_grid(nx=50, ny=50, do_plot=False)
-    colors = sample_colors_from_image_by_grid(image_path, hex_centers[:, 0], hex_centers[:, 1])
-
-    fig, axs = plt.subplots(2, 2)
-    axs[0, 0].imshow(plt.imread(image_path))
-    plot_single_lattice_custom_colors(hex_centers[:, 0], hex_centers[:, 1],
-                                      face_color=colors,
-                                      edge_color=colors,
-                                      min_diam=1.,
-                                      plotting_gap=0,
-                                      rotate_deg=0,
-                                      line_width=0.3,
-                                      h_ax=axs[0, 1])
-    plot_single_lattice_custom_colors(hex_centers[:, 0], hex_centers[:, 1],
-                                      face_color=colors,
-                                      edge_color=colors*0,
-                                      min_diam=1.,
-                                      plotting_gap=0,
-                                      rotate_deg=0,
-                                      line_width=1.,
-                                      h_ax=axs[1, 0])
-    plot_single_lattice_custom_colors(hex_centers[:, 0], hex_centers[:, 1],
-                                      face_color=colors,
-                                      edge_color=colors*0,
-                                      min_diam=1.,
-                                      plotting_gap=0,
-                                      rotate_deg=0,
-                                      line_width=0.1,
-                                      h_ax=axs[1, 1])
-
-    plt.show(block=True)
-
-
-if __name__ == "__main__":
-    # Main function includes multiple examples
-    main()
+# def main():
+#
+#     plt.ion()
+#
+#     # (1) === Create single hexagonal 5*5 lattice and plot it. Extract the [x,y] locations of the tile centers
+#
+#     N = 5
+#     r = 50
+#
+#
+#     hex_centers, h_ax = create_hex_grid(nx=N, ny=N, crop_circ=N*r, min_diam=2*r, do_plot=True, h_ax=None)
+#     tile_centers_x = hex_centers[:, 0]
+#     tile_centers_y = hex_centers[:, 1]
+#     print(h_ax)
+#     # plt.show(block=True)   % The 'show' call should be done explicitly
+#
+#     plt.show(block=True)
+#
+#
+# if __name__ == "__main__":
+#     # Main function includes multiple examples
+#     main()
